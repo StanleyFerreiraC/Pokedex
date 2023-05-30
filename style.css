@@ -11,11 +11,26 @@ body {
   justify-content: center;
   background: #000000;
 }
+@media (max-width: 1200px)
+{
+  .pokemon-grid
+   {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+   }
+}
+@media (max-width: 600px)
+{
+  .pokemon-grid
+   {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+   }
 
+}
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+
 }
 
 .pokemon-card {
