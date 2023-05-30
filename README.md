@@ -1,3 +1,3 @@
 # Pokedex
 
-![PAGE](https://stanleyferreirac.github.io/Pokedex/)
+[PAGE](https://stanleyferreirac.github.io/Pokedex/)
