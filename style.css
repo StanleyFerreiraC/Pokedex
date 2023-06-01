@@ -38,7 +38,6 @@ body {
 }
 .pokemon-grid {
   display: grid;
-
 }
 
 .pokemon-card {
@@ -52,6 +51,7 @@ body {
   text-align: center;
   transition: transform 0.3s;
   cursor: pointer;
+  border: none;
 }
 .pokemon-card:hover {
   transform: scale(1.1);
@@ -99,14 +99,6 @@ body {
   font-size: 16px;
 }
 
-.pokemon-details {
-  margin-top: 20px;
-}
-
-.pokemon-details p {
-  margin: 5px 0;
-}
-
 h3 {
   font-size: 10px;
   margin-top: 10px;
@@ -129,8 +121,43 @@ width: 100%;
 }
 #loadMoreButton {
   height: 100%;
-width: 22%;
+width: 120px;
 border-radius: 10px;
-background-color: #a7a6a6
+background-color: #a7a6a6;
+border: none;
 }
 
+#searchBarContainer {
+  text-align: center;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#searchBar {
+  text-align: center;
+  height: 30px;
+  border-radius: 10px;
+  border: none;
+}
+#searchButton {
+  cursor: pointer;
+  margin-left: 10px;
+  border-radius: 10px;
+  height: 30px;
+  width: 30px;
+  border: none;
+}
+#searchButton svg {
+  width: 18px;
+  height: 18px;
+  fill: #a7a6a6;
+}
+
+#searchButton:hover svg {
+  fill: #333;
+  
+}
+#searchButton:hover {
+  background: #a7a6a6;
+}
