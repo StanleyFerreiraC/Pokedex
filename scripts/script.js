@@ -1,77 +1,136 @@
+// Variáveis globais para controle do carregamento dos Pokémon
 let offset = 0;
-    const limit = 15;
-    let isLoading = false;
+const limit = 12;
+let isLoading = false;
+let pokemonData = [];
 
-    async function getPokemonData(offset, limit) {
-      try {
-        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
-        const pokemonList = response.data.results;
-        const pokemonData = [];
+function setLimitBasedOnResolution() {
+  if (window.innerWidth <= 768) {
+    limit = 11; // Valor para resoluções menores, como dispositivos móveis
+  } else {
+    limit = 12; // Valor padrão para resoluções maiores
+  }
+}
 
-        for (const pokemon of pokemonList) {
-          const pokemonResponse = await axios.get(pokemon.url);
-          const pokemonInfo = {
-            name: pokemonResponse.data.name,
-            type: pokemonResponse.data.types.map((type) => type.type.name),
-            imageUrl: pokemonResponse.data.sprites.front_default,
-          };
-          pokemonData.push(pokemonInfo);
-        }
+async function getPokemonData(offset, limit) {
+  try {
+    const response = await axios.get(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
+    const pokemonList = response.data.results;
 
-        return pokemonData;
-      } catch (error) {
-        console.error('Erro ao obter dados dos Pokémons:', error);
-        return [];
-      }
-    }
+    const requests = pokemonList.map((pokemon) => axios.get(pokemon.url));
+    const responses = await Promise.all(requests);
 
-    function createPokemonCard(pokemon) {
-      const pokemonCard = document.createElement('div');
-      pokemonCard.classList.add('pokemon-card');
+    pokemonData = responses.map((response) => {
+      const pokemon = response.data;
+      return {
+        name: pokemon.name,
+        number: pokemon.id,
+        type: pokemon.types.map((type) => type.type.name),
+        imageUrl: pokemon.sprites.front_default,
+      };
+    });
 
-      const nameElement = document.createElement('h3');
-      nameElement.textContent = pokemon.name;
+    return pokemonData;
+  } catch (error) {
+    console.error('Erro ao obter dados dos Pokémons:', error);
+    return [];
+  }
+}
 
-      const typeElement = document.createElement('p');
-      typeElement.textContent = pokemon.type.join(', ');
+function createPokemonCard(pokemon) {
+  const pokemonCard = document.createElement('div');
+  pokemonCard.classList.add('pokemon-card');
 
-      const imageElement = document.createElement('img');
-      imageElement.classList.add('pokemon-image');
-      imageElement.src = pokemon.imageUrl;
-      imageElement.alt = pokemon.name;
+  const nameElement = document.createElement('h3');
+  nameElement.textContent = pokemon.name;
 
-      pokemonCard.appendChild(imageElement);
-      pokemonCard.appendChild(nameElement);
-      pokemonCard.appendChild(typeElement);
-      
+  const typeElement = document.createElement('p');
+  typeElement.textContent = pokemon.type.join(', ');
 
-      return pokemonCard;
-    }
+  const imageElement = document.createElement('img');
+  imageElement.classList.add('pokemon-image');
+  imageElement.src = pokemon.imageUrl;
+  imageElement.alt = pokemon.name;
+  
+  pokemonCard.appendChild(imageElement);
+  pokemonCard.appendChild(nameElement);
+  pokemonCard.appendChild(typeElement);
 
-    async function loadMorePokemon() {
-      if (isLoading) return;
 
-      isLoading = true;
+  return pokemonCard;
+}
 
-      try {
-        const pokemonData = await getPokemonData(offset, limit);
-        const pokemonGrid = document.querySelector('.pokemon-grid');
+async function loadMorePokemon() {
+  if (isLoading) return;
 
-        pokemonData.forEach((pokemon) => {
-          const pokemonCard = createPokemonCard(pokemon);
-          pokemonGrid.appendChild(pokemonCard);
-        });
+  isLoading = true;
 
-        offset += limit;
-      } catch (error) {
-        console.error('Erro ao carregar mais Pokémon:', error);
-      }
+  try {
+    const pokemonData = await getPokemonData(offset, limit);
+    const pokemonGrid = document.querySelector('.pokemon-grid');
 
-      isLoading = false;
-    }
+    pokemonData.forEach((pokemon) => {
+      const pokemonCard = createPokemonCard(pokemon);
+      pokemonGrid.appendChild(pokemonCard);
+    });
 
-    const loadMoreButton = document.getElementById('loadMoreButton');
-    loadMoreButton.addEventListener('click', loadMorePokemon);
+    offset += limit;
+  } catch (error) {
+    console.error('Erro ao carregar mais Pokémon:', error);
+  }
 
-    // Carregar os primeiros 12 Pokémon ao iniciar a página
-    window.addEventListener('DOMContentLoaded', loadMorePokemon);
+  isLoading = false;
+}
+
+function clearPokemonGrid() {
+  const pokemonGrid = document.querySelector('.pokemon-grid');
+  pokemonGrid.innerHTML = '';
+}
+
+function searchPokemon() {
+  const searchBar = document.getElementById('searchBar');
+  const searchQuery = searchBar.value.trim().toLowerCase();
+
+  if (!searchQuery) {
+    // Se a barra de pesquisa estiver vazia, recarrega todos os Pokémon
+    offset = 0;
+    clearPokemonGrid();
+    loadMorePokemon();
+    return;
+  }
+
+  const filteredPokemon = pokemonData.filter((pokemon) => {
+    return pokemon.name.toLowerCase().includes(searchQuery);
+  });
+
+  clearPokemonGrid();
+
+  if (filteredPokemon.length === 0) {
+    const pokemonGrid = document.querySelector('.pokemon-grid');
+    const noResultsElement = document.createElement('p');
+    noResultsElement.textContent = 'Nenhum Pokémon encontrado.';
+    pokemonGrid.appendChild(noResultsElement);
+  } else {
+    filteredPokemon.forEach((pokemon) => {
+      const pokemonCard = createPokemonCard(pokemon);
+      const pokemonGrid = document.querySelector('.pokemon-grid');
+      pokemonGrid.appendChild(pokemonCard);
+    });
+  }
+}
+
+const loadMoreButton = document.getElementById('loadMoreButton');
+loadMoreButton.addEventListener('click', loadMorePokemon);
+
+const searchButton = document.getElementById('searchButton');
+searchButton.addEventListener('click', searchPokemon);
+
+const searchBar = document.getElementById('searchBar');
+searchBar.addEventListener('keyup', (event) => {
+  if (event.key === 'Enter') {
+    searchPokemon();
+  }
+});
+
+// Carregar os primeiros 12 Pokémon ao iniciar a página
+window.addEventListener('DOMContentLoaded', loadMorePokemon);
