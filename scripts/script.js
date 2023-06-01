@@ -1,74 +1,77 @@
-async function getPokemonData() {
-  try {
-    const response = await axios.get('https://pokeapi.co/api/v2/pokemon?limit=150');
-    const pokemonList = response.data.results;
-    const pokemonData = [];
+let offset = 0;
+    const limit = 15;
+    let isLoading = false;
 
-    for (const pokemon of pokemonList) {
-      const pokemonResponse = await axios.get(pokemon.url);
-      const pokemonInfo = {
-        name: pokemonResponse.data.name,
-        type: pokemonResponse.data.types.map((type) => type.type.name),
-        imageUrl: pokemonResponse.data.sprites.front_default,
-      };
-      pokemonData.push(pokemonInfo);
+    async function getPokemonData(offset, limit) {
+      try {
+        const response = await axios.get(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
+        const pokemonList = response.data.results;
+        const pokemonData = [];
+
+        for (const pokemon of pokemonList) {
+          const pokemonResponse = await axios.get(pokemon.url);
+          const pokemonInfo = {
+            name: pokemonResponse.data.name,
+            type: pokemonResponse.data.types.map((type) => type.type.name),
+            imageUrl: pokemonResponse.data.sprites.front_default,
+          };
+          pokemonData.push(pokemonInfo);
+        }
+
+        return pokemonData;
+      } catch (error) {
+        console.error('Erro ao obter dados dos Pokémons:', error);
+        return [];
+      }
     }
 
-    return pokemonData;
-  } catch (error) {
-    console.error('Erro ao obter dados dos Pokémons:', error);
-    return [];
-  }
-}
+    function createPokemonCard(pokemon) {
+      const pokemonCard = document.createElement('div');
+      pokemonCard.classList.add('pokemon-card');
 
-function createPokemonCard(pokemon) {
-  const pokemonCard = document.createElement('div');
-  pokemonCard.classList.add('pokemon-card');
+      const nameElement = document.createElement('h3');
+      nameElement.textContent = pokemon.name;
 
-  const nameElement = document.createElement('h3');
-  nameElement.textContent = pokemon.name;
+      const typeElement = document.createElement('p');
+      typeElement.textContent = pokemon.type.join(', ');
 
-  const typeElement = document.createElement('p');
-  typeElement.textContent = pokemon.type.join(', ');
+      const imageElement = document.createElement('img');
+      imageElement.classList.add('pokemon-image');
+      imageElement.src = pokemon.imageUrl;
+      imageElement.alt = pokemon.name;
 
-  const imageElement = document.createElement('img');
-  imageElement.classList.add('pokemon-image');
-  imageElement.setAttribute('data-src', pokemon.imageUrl);
-  imageElement.alt = pokemon.name;
+      pokemonCard.appendChild(imageElement);
+      pokemonCard.appendChild(nameElement);
+      pokemonCard.appendChild(typeElement);
+      
 
-  pokemonCard.appendChild(imageElement);
-  pokemonCard.appendChild(nameElement);
-  pokemonCard.appendChild(typeElement);
+      return pokemonCard;
+    }
 
-  return pokemonCard;
-}
+    async function loadMorePokemon() {
+      if (isLoading) return;
 
-async function loadPokemon() {
-  const pokemonData = await getPokemonData();
-  const pokemonGrid = document.querySelector('.pokemon-grid');
+      isLoading = true;
 
-  const options = {
-    root: null,
-    rootMargin: '0px',
-    threshold: 0.2
-  };
+      try {
+        const pokemonData = await getPokemonData(offset, limit);
+        const pokemonGrid = document.querySelector('.pokemon-grid');
 
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const image = entry.target;
-        image.src = image.dataset.src;
-        observer.unobserve(image);
+        pokemonData.forEach((pokemon) => {
+          const pokemonCard = createPokemonCard(pokemon);
+          pokemonGrid.appendChild(pokemonCard);
+        });
+
+        offset += limit;
+      } catch (error) {
+        console.error('Erro ao carregar mais Pokémon:', error);
       }
-    });
-  }, options);
 
-  pokemonData.forEach((pokemon) => {
-    const pokemonCard = createPokemonCard(pokemon);
-    pokemonGrid.appendChild(pokemonCard);
-    observer.observe(pokemonCard.querySelector('.pokemon-image'));
-  });
-}
+      isLoading = false;
+    }
 
-// Carrega todos os Pokémon ao carregar a página
-loadPokemon();
+    const loadMoreButton = document.getElementById('loadMoreButton');
+    loadMoreButton.addEventListener('click', loadMorePokemon);
+
+    // Carregar os primeiros 12 Pokémon ao iniciar a página
+    window.addEventListener('DOMContentLoaded', loadMorePokemon);
