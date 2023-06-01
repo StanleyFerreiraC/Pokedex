@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pokedex</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   </head>
+
   <body>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <h1>Pokedex</h1>
     <div class="fundo">
+      <div id="searchBarContainer">
+        <input type="text" id="searchBar" placeholder="Pesquisar por nome">
+        <button id="searchButton" aria-label="Pesquisar">
+          <i class="material-icons">search</i>
+        </button>
+      </div>
     <div class="pokemon-grid" id="pokeContainer"></div>
     <div id="pokemonDetailsModal" style="display: none;">
       <div id="pokemonDetailsContent"></div>
@@ -20,4 +29,5 @@
   </div>
     <script src="./scripts/script.js"></script>
   </body>
+  
 </html>
