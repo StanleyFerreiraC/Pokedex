@@ -33,12 +33,12 @@ function createPokemonCard(pokemon) {
 
   const imageElement = document.createElement('img');
   imageElement.classList.add('pokemon-image');
-  imageElement.src = pokemon.imageUrl;
+  imageElement.setAttribute('data-src', pokemon.imageUrl);
   imageElement.alt = pokemon.name;
 
-  pokemonCard.appendChild(imageElement);
   pokemonCard.appendChild(nameElement);
   pokemonCard.appendChild(typeElement);
+  pokemonCard.appendChild(imageElement);
 
   return pokemonCard;
 }
@@ -47,9 +47,26 @@ async function loadPokemon() {
   const pokemonData = await getPokemonData();
   const pokemonGrid = document.querySelector('.pokemon-grid');
 
+  const options = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.2
+  };
+
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const image = entry.target;
+        image.src = image.dataset.src;
+        observer.unobserve(image);
+      }
+    });
+  }, options);
+
   pokemonData.forEach((pokemon) => {
     const pokemonCard = createPokemonCard(pokemon);
     pokemonGrid.appendChild(pokemonCard);
+    observer.observe(pokemonCard.querySelector('.pokemon-image'));
   });
 }
 
