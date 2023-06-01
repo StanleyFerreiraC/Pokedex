@@ -38,6 +38,7 @@ body {
 }
 .pokemon-grid {
   display: grid;
+
 }
 
 .pokemon-card {
@@ -119,3 +120,17 @@ p {
 h1 {
   color: #eeeeee;
 }
+
+#loadMoreButtonContainer {
+  text-align: center;
+  margin-top: 20px;
+  height: 40px;
+width: 100%;
+}
+#loadMoreButton {
+  height: 100%;
+width: 22%;
+border-radius: 10px;
+background-color: #a7a6a6
+}
+
