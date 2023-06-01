@@ -36,9 +36,9 @@ function createPokemonCard(pokemon) {
   imageElement.setAttribute('data-src', pokemon.imageUrl);
   imageElement.alt = pokemon.name;
 
+  pokemonCard.appendChild(imageElement);
   pokemonCard.appendChild(nameElement);
   pokemonCard.appendChild(typeElement);
-  pokemonCard.appendChild(imageElement);
 
   return pokemonCard;
 }
